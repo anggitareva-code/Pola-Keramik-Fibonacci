@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penataan Keramik Ruangan 2xN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Penataan Keramik Ruangan 2xN</h1>
+        <p>Masukkan nilai N (lebar/panjang ruangan) untuk ruangan berukuran 2xN dan keramik 2x1.</p>
+
+        <div class="input-section">
+            <label for="inputN">Nilai N:</label>
+            <input type="number" id="inputN" min="1" value="4">
+            <button onclick="hitungKombinasi()">Hitung & Visualisasi</button>
+        </div>
+
+        <div id="hasil-hitung">Masukkan nilai N dan tekan "Hitung & Visualisasi"</div>
+
+        <div class="visualisasi-section">
+            <h2>Visualisasi Bentuk-bentuk Kombinasi:</h2>
+            <p class="note">(Catatan: Visualisasi kombinasi bentuk hanya akan ditampilkan untuk nilai N yang kecil,
+                karena jumlah kombinasi bertambah sangat cepat)</p>
+            <div id="grid-container" class="grid-container"></div>
+        </div>
+    </div>
+
+    <script>
+        function hitungKombinasi() {
+            const N = parseInt(document.getElementById('inputN').value);
+            const hasilHitung = document.getElementById('hasil-hitung');
+            const gridContainer = document.getElementById('grid-container');
+
+            if (isNaN(N) || N < 1) {
+                hasilHitung.textContent = "Masukkan nilai N yang valid (bilangan bulat positif, minimal 1).";
+                gridContainer.innerHTML = "";
+                return;
+            }
+
+            if (N > 8) {
+                hasilHitung.textContent = `Total Kombinasi untuk 2x${N}: ${hitungFibonacci(N)} cara.`;
+                gridContainer.innerHTML = "<p>Visualisasi dihentikan karena nilai N terlalu besar (N > 8).</p>";
+                return;
+            }
+
+            const semuaKombinasi = getCombinations(N);
+            hasilHitung.textContent = `Total Kombinasi untuk 2x${N}: ${semuaKombinasi.length} cara.`;
+
+            visualisasiKombinasi(N, gridContainer, semuaKombinasi);
+        }
+
+        function hitungFibonacci(n) {
+            if (n <= 1) return 1;
+            let a = 1, b = 1;
+            for (let i = 2; i <= n; i++) {
+                [a, b] = [b, a + b];
+            }
+            return b;
+        }
+
+        function getCombinations(targetN) {
+            if (targetN === 0) return [[]];
+            if (targetN < 0) return [];
+
+            let results = [];
+
+            const verticalResults = getCombinations(targetN - 1);
+            verticalResults.forEach(sub => results.push(['V', ...sub]));
+
+            const horizontalResults = getCombinations(targetN - 2);
+            horizontalResults.forEach(sub => results.push(['H', ...sub]));
+
+            return results;
+        }
+
+        function visualisasiKombinasi(N, container, semuaKombinasi) {
+            container.innerHTML = "";
+
+            semuaKombinasi.forEach(kombinasi => {
+                const ruanganDiv = document.createElement('div');
+                ruanganDiv.className = 'ruangan-2xN';
+                ruanganDiv.style.display = "grid";
+                ruanganDiv.style.gridTemplateRows = "repeat(2, 30px)";
+                ruanganDiv.style.gridTemplateColumns = `repeat(${N}, 30px)`;
+                ruanganDiv.style.border = "1px solid #ccc";
+                ruanganDiv.style.margin = "10px";
+                ruanganDiv.style.position = "relative";
+
+                let ubinHTML = [];
+                let currentCol = 0;
+
+                kombinasi.forEach(type => {
+                    if (type === 'V') {
+                        ubinHTML.push(`
+                        <div class="ubin vertikal" 
+                             style="grid-column: ${currentCol + 1}; grid-row: 1 / span 2; background: #4cc9f0; border:1px solid #000;"></div>
+                    `);
+                        currentCol += 1;
+                    } else if (type === 'H') {
+                        ubinHTML.push(`
+                        <div class="ubin horizontal" style="grid-column: ${currentCol + 1}; grid-row: 1; background:#f72585; border:1px solid #000;"></div>
+                    `);
+                        ubinHTML.push(`
+                        <div class="ubin horizontal" style="grid-column: ${currentCol + 2}; grid-row: 1; background:#f72585; border:1px solid #000;"></div>
+                    `);
+                        ubinHTML.push(`
+                        <div class="ubin horizontal" style="grid-column: ${currentCol + 1}; grid-row: 2; background:#f72585; border:1px solid #000;"></div>
+                    `);
+                        ubinHTML.push(`
+                        <div class="ubin horizontal" style="grid-column: ${currentCol + 2}; grid-row: 2; background:#f72585; border:1px solid #000;"></div>
+                    `);
+                        currentCol += 2;
+                    }
+                });
+
+                ruanganDiv.innerHTML = ubinHTML.join('');
+                container.appendChild(ruanganDiv);
+            });
+        }
+    </script>
+
+</body>
+
+</html>
